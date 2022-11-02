@@ -1,0 +1,31 @@
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /css/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /css/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] Loaded HTML Templates (4): 
+	- index.html
+	- 
+	- footer.html
+	- header.html
+
+[GIN-debug] GET    /view/vehicles            --> car-park/controllers.VehicleController.ShowAll-fm (3 handlers)
+[GIN-debug] GET    /api/vehicles             --> main.main.func1 (3 handlers)
+[GIN-debug] POST   /api/vehicles             --> main.main.func2 (3 handlers)
+[GIN-debug] PUT    /api/vehicles/:id         --> main.main.func3 (3 handlers)
+[GIN-debug] DELETE /api/vehicles/:id         --> main.main.func4 (3 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8888
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /view/vehicles - 200 - 1.493189ms 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /views/css/index.css - 404 - 200ns 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /view/vehicles - 200 - 1.384967ms 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /views/css/index.css - 404 - 131ns 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /favicon.ico - 404 - 201ns 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /view/vehicles - 200 - 1.496526ms 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /views/css/index.css - 404 - 291ns 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /view/vehicles - 200 - 1.191455ms 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /views/css/index.css - 404 - 141ns 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /view/vehicles - 200 - 1.086229ms 
+[02 Nov 22 12:46 MSK]: 127.0.0.1 - GET - /views/css/index.css - 404 - 120ns 
