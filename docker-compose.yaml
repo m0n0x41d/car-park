@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  carpark:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    links:
+      - db
+    ports:
+      - 8888:8888
+  db:
+    image: postgres:13.2-alpine
+    ports:
+      - 5432:5432
+    environment:
+        POSTGRES_DB: car_park_dev
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: qwerty

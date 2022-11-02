@@ -21,7 +21,7 @@ type dbConn struct {
 }
 
 //TODO: Make it parameterizable and secure.
-var connectionString = "host=localhost port=5432 user=admin password=qwerty dbname=car_park_dev sslmode=disable"
+var connectionString = "host=db port=5432 user=admin password=qwerty dbname=car_park_dev sslmode=disable"
 
 func NewVehicleDB() VehicleDB {
 	db, err := gorm.Open("postgres", connectionString)
