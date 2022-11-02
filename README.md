@@ -2,9 +2,6 @@
 
 This is a learning project from the skillsmart coding school.
 
-
-
-
 #### Current state:
 
 
@@ -19,7 +16,7 @@ There is no ui for adding new records service tight now, but basic api already i
 
 ##### Api
 
-POST at `:8888/api/vehicles` with json like:
+- POST at `:8888/api/vehicles` with json like:
 
 ```
 {
@@ -32,6 +29,5 @@ POST at `:8888/api/vehicles` with json like:
 
 Will add new record in database.
 
-- PUT `"/vehicles/:id` with same json structure will update record with this ID.
-
-- DELETE `"/vehicles/:id` will delete record with this ID.
+- PUT `"/vehicles/:id` with same json structure will update record with specified ID.
+- DELETE `"/vehicles/:id` will delete record with specified ID.
