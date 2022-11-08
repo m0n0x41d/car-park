@@ -17,7 +17,8 @@ type Vehicle struct {
 
 type CarModel struct {
 	// ID               uint64 `gorm:"primary_key;auto_increment" json:"id"`
-	ID               int
+	// ID               int
+	gorm.Model
 	Brand            string  `json:"brand" form:"brand"`
 	CarType          string  `json:"carmodel" form:"carmodel"`
 	FuelTankCapacity uint    `json:"fueltankcapacity" form:"fueltankcapacity"`

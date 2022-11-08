@@ -67,7 +67,18 @@ func (db *dbConn) Update(v Vehicle) error {
 }
 
 func (db *dbConn) Delete(v Vehicle) error {
-	return db.connection.Delete(&v).Error
+	var findV Vehicle
+	findV.ID = v.ID
+	db.connection.Preload("CarModel").Find(&findV)
+	fmt.Println(findV)
+	var carM CarModel
+	carM.ID = findV.CarModel.ID
+	fmt.Println(carM)
+	err := db.connection.Delete(&carM).Error
+	if err != nil {
+		return err
+	}
+	return db.connection.Delete(&findV).Error
 }
 
 func (db *dbConn) VehicleByID(id uint) Vehicle {
