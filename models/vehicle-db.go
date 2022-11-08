@@ -3,15 +3,22 @@ package models
 //TODO: Candidate on refactoring...
 
 import (
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	// "github.com/jinzhu/gorm"
+	// _ "github.com/jinzhu/gorm/dialects/postgres"
+	"fmt"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type VehicleDB interface {
 	Save(vehicle Vehicle) error
 	Update(vehicle Vehicle) error
 	Delete(vehicle Vehicle) error
-	FindAll() []Vehicle
+	FindAllVehicles() []Vehicle
+	VehicleByID(id uint) Vehicle
+	FindAllCarModels() []CarModel
 	CloseConnection()
 	DestructiveReset() error
 }
@@ -21,22 +28,31 @@ type dbConn struct {
 }
 
 //TODO: Make it parameterizable and secure.
-var connectionString = "host=db port=5432 user=admin password=qwerty dbname=car_park_dev sslmode=disable"
+var connectionString = "host=localhost port=5432 user=admin password=qwerty dbname=car_park_dev sslmode=disable"
 
 func NewVehicleDB() VehicleDB {
-	db, err := gorm.Open("postgres", connectionString)
+	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		panic("Failed to connect to database")
 	}
-	db.LogMode(true)
-	db.AutoMigrate(&Vehicle{})
+	// db.LogMode(true)
+
+	db.AutoMigrate(&CarModel{}, &Vehicle{})
 	return &dbConn{
 		connection: db,
 	}
 }
 
 func (db *dbConn) CloseConnection() {
-	err := db.connection.Close()
+	sqlDb, err := db.connection.DB()
+	if err != nil {
+		panic("Failed to close database connection (fetching interface)")
+	}
+
+	err = fmt.Errorf(sqlDb.Close().Error())
+
 	if err != nil {
 		panic("Failed to close database connection")
 	}
@@ -54,17 +70,32 @@ func (db *dbConn) Delete(v Vehicle) error {
 	return db.connection.Delete(&v).Error
 }
 
-func (db *dbConn) FindAll() []Vehicle {
+func (db *dbConn) VehicleByID(id uint) Vehicle {
+	var vehicle Vehicle
+	vehicle.ID = id
+	db.connection.Preload("CarModel").Find(&vehicle)
+	return vehicle
+
+}
+
+func (db *dbConn) FindAllVehicles() []Vehicle {
 	var vehicles []Vehicle
 	// in case of appearence foreign keys (nested structs in Vehicle table)
 	// change below to db.connection.Set("gorm:auto_preload", true).Find(&vehicles)
-	db.connection.Find(&vehicles)
+	db.connection.Preload("CarModel").Find(&vehicles)
+	// db.connection.Find(&vehicles)
 	return vehicles
+}
+
+func (db *dbConn) FindAllCarModels() []CarModel {
+	var carModels []CarModel
+	db.connection.Find(&carModels)
+	return carModels
 }
 
 // DROPDATABASE!
 func (db *dbConn) DestructiveReset() error {
-	err := db.connection.DropTableIfExists(&Vehicle{}).Error
+	err := db.connection.Delete(&Vehicle{}, &CarModel{}).Error
 	if err != nil {
 		return err
 	}

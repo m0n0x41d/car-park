@@ -29,7 +29,6 @@ func setupLogFile() {
 }
 
 func main() {
-	// vehicleDB.DestructiveReset()
 	setupLogFile()
 	defer vehicleDB.CloseConnection()
 
@@ -37,73 +36,72 @@ func main() {
 	server.Use(gin.Recovery(), middlewares.Logger())
 
 	server.Static("/css", "./views/templates/css")
+	server.StaticFile("/logo.svg", "./views/assets/logo-1-white.svg")
 	server.LoadHTMLGlob("./views/templates/*.html")
+
+	server.GET("/", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "index.html", gin.H{})
+	})
+
+	server.NoRoute(func(ctx *gin.Context) {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"code": "404", "message": "PAGE NOT FOUND"})
+	})
 
 	viewRoutes := server.Group("/view")
 	{
-		viewRoutes.GET("/vehicles", vehicleController.ShowAll)
+		viewRoutes.GET("/vehicles", vehicleController.ShowAllVehicles)
+		viewRoutes.GET("/vehicles/create", vehicleController.ShowCreateVehicle)
+		viewRoutes.GET("/vehicles/edit/:id", vehicleController.ShowEditVehicle)
+		viewRoutes.GET("/carmodels", vehicleController.ShowAllCarModels)
 	}
 
 	apiRoutes := server.Group("/api")
 	{
-		apiRoutes.GET("/vehicles", func(ctx *gin.Context) {
-			ctx.JSON(200, vehicleController.FindAll())
-		})
+		// apiRoutes.GET("/vehicles", func(ctx *gin.Context) {
+		// 	ctx.JSON(200, vehicleController.FindAllVehicles())
+		// })
 
 		// POST new vehicle
 		apiRoutes.POST("/vehicles", func(ctx *gin.Context) {
-			err := vehicleController.Save(ctx)
+			err := vehicleController.SaveVehicle(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"message": "Success!"})
+				// ctx.JSON(http.StatusOK, gin.H{"message": "Success!"})
+				ctx.Redirect(http.StatusFound, "/view/vehicles")
 			}
 
 		})
 
 		// PUT is update existing vehicle
-		apiRoutes.PUT("/vehicles/:id", func(ctx *gin.Context) {
-			err := vehicleController.Update(ctx)
+		apiRoutes.POST("/update/vehicle/:id", func(ctx *gin.Context) {
+			vehicleController.UpdateVehicle(ctx)
+			err := vehicleController.UpdateVehicle(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"message": "Success!"})
+				ctx.Redirect(http.StatusFound, "/view/vehicles")
 			}
 
 		})
 
-		apiRoutes.DELETE("/vehicles/:id", func(ctx *gin.Context) {
-			err := vehicleController.Delete(ctx)
+		apiRoutes.POST("/delete/vehicle/:id", func(ctx *gin.Context) {
+			err := vehicleController.DeleteVehicle(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"message": "Success!"})
+				ctx.Redirect(http.StatusFound, "/view/vehicles")
 			}
 
 		})
 
 	}
-
-	// {
-	// 	apiRoutes.GET("/vehicles", func(ctx *gin.Context) {
-	// 		ctx.JSON(200, vehicleController.FindAll())
-	// 	})
-
-	// 	apiRoutes.POST("/vehicles", func(ctx *gin.Context) {
-	// 		err := vehicleController.Save(ctx)
-	// 		if err != nil {
-	// 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 			return
-	// 		}
-
-	// 		ctx.JSON(http.StatusOK, gin.H{"message": "Saved successfully."})
-
-	// 	})
-	// }
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8888"
 	}
+	// vehicleDB.DestructiveReset()
 	server.Run(":" + port)
 }
