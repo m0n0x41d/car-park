@@ -2,22 +2,20 @@ package models
 
 import "gorm.io/gorm"
 
-// "github.com/jinzhu/gorm"
-
 type Vehicle struct {
-	// ID               uint64    `gorm:"primary_index;auto_increment" json:"id"`
 	gorm.Model
-	Description      string   `json:"description" form:"description"`
-	Price            uint     `gorm:"not null" json:"price" form:"price"`
-	Mileage          uint     `json:"mileage" form:"mileage"`
-	ManufacturedYear uint     `json:"manufactured" form:"manufactured"`
-	CarModel         CarModel `json:"carmodel" binding:"required"`
-	CarModelID       uint     `json:"-" form:"-"`
+	Enterprise       Enterprise `gorm:"foreignKey:EnterpriseID" json:"-"`
+	EnterpriseID     uint       `json:"enterprise_id" form:"enterprise_id"`
+	Description      string     `json:"description" form:"description"`
+	Price            uint       `gorm:"not null" json:"price" form:"price"`
+	Mileage          uint       `json:"mileage" form:"mileage"`
+	ManufacturedYear uint       `json:"manufactured" form:"manufactured"`
+	CarModel         CarModel   `json:"-" binding:"required"`
+	CarModelID       uint       `json:"carmodel_id" form:"-"`
+	Drivers          []Driver   `gorm:"many2many:vehicle_drivers"`
 }
 
 type CarModel struct {
-	// ID               uint64 `gorm:"primary_key;auto_increment" json:"id"`
-	// ID               int
 	gorm.Model
 	Brand            string  `json:"brand" form:"brand"`
 	CarType          string  `json:"carmodel" form:"carmodel"`
@@ -30,7 +28,7 @@ type VehicleService interface {
 	SaveVehicle(Vehicle) error
 	UpdateVehicle(Vehicle) error
 	DeleteVehicle(Vehicle) error
-	FindAllVehicles() []Vehicle
+	FindAllVehicles(preload bool) []Vehicle
 	FindAllCarModels() []CarModel
 	VehicleByID(id uint) Vehicle
 }
@@ -46,19 +44,19 @@ func NewVehicleService(vehicleDB VehicleDB) VehicleService {
 }
 
 func (service *vehicleService) SaveVehicle(v Vehicle) error {
-	return service.vehicleDB.Save(v)
+	return service.vehicleDB.SaveVehicle(v)
 }
 
 func (service *vehicleService) UpdateVehicle(v Vehicle) error {
-	return service.vehicleDB.Update(v)
+	return service.vehicleDB.UpdateVehicle(v)
 }
 
 func (service *vehicleService) DeleteVehicle(v Vehicle) error {
-	return service.vehicleDB.Delete(v)
+	return service.vehicleDB.DeleteVehicle(v)
 }
 
-func (service *vehicleService) FindAllVehicles() []Vehicle {
-	return service.vehicleDB.FindAllVehicles()
+func (service *vehicleService) FindAllVehicles(preload bool) []Vehicle {
+	return service.vehicleDB.FindAllVehicles(preload)
 }
 
 func (service *vehicleService) FindAllCarModels() []CarModel {

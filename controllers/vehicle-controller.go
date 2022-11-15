@@ -12,7 +12,7 @@ import (
 )
 
 type VehicleController interface {
-	FindAllVehicles() []models.Vehicle
+	FindAllVehicles(preload bool) []models.Vehicle
 	FindAllCarModels() []models.CarModel
 	SaveVehicle(ctx *gin.Context) error
 	UpdateVehicle(ctx *gin.Context) error
@@ -36,8 +36,8 @@ func NewVehicleController(svc models.VehicleService) VehicleController {
 	}
 }
 
-func (c *vehicleController) FindAllVehicles() []models.Vehicle {
-	return c.service.FindAllVehicles()
+func (c *vehicleController) FindAllVehicles(preload bool) []models.Vehicle {
+	return c.service.FindAllVehicles(preload)
 }
 
 func (c *vehicleController) FindAllCarModels() []models.CarModel {
@@ -50,7 +50,10 @@ func (c *vehicleController) SaveVehicle(ctx *gin.Context) error {
 	fmt.Println("HELLOFROM SAVE CONTROLLER")
 	fmt.Println(vehicle)
 	err := ctx.Bind(&vehicle)
-
+	vehicleBrand := vehicle.CarModel.Brand
+	if vehicleBrand == "Choose car Brand" || vehicleBrand == "" {
+		vehicle.CarModel.Brand = "No Brand"
+	}
 	fmt.Println(vehicle)
 	// err := ctx.ShouldBind(&vehicle)
 	// ctx.Request.ParseForm()
@@ -70,20 +73,14 @@ func (c *vehicleController) UpdateVehicle(ctx *gin.Context) error {
 
 	id, _ := strconv.ParseUint(ctx.Param("id"), 0, 0)
 
+	fmt.Println(ctx.Param("id") + " ID BLYAD!")
 	vehicleOrig = c.service.VehicleByID(uint(id))
 	validate.Struct(vehicleOrig)
-	fmt.Println("HELLO FROM UPDATE CONTROLLER: THIS IS ORIGINAL")
-	fmt.Println(vehicleOrig)
-	// data := gin.H{
-	// 	"title":   "Edit car in stock",
-	// 	"vehicle": vehicle,
-	// }
 
 	var newVehicle models.Vehicle
 	err := ctx.Bind(&newVehicle)
+
 	mergo.Merge(&newVehicle, vehicleOrig)
-	fmt.Println("THIS IS NEW ONE")
-	fmt.Println(newVehicle)
 	if err != nil {
 		return err
 	}
@@ -96,7 +93,6 @@ func (c *vehicleController) UpdateVehicle(ctx *gin.Context) error {
 	if err != nil {
 		return err
 	}
-
 	return c.service.UpdateVehicle(newVehicle)
 }
 
@@ -107,12 +103,13 @@ func (c *vehicleController) DeleteVehicle(ctx *gin.Context) error {
 		return err
 	}
 	vehicle.ID = uint(id)
+	fmt.Println(ctx.ContentType() + " COOOOOOOOOOONTENTTYPE!")
 	c.service.DeleteVehicle(vehicle)
 	return nil
 }
 
 func (c *vehicleController) ShowAllVehicles(ctx *gin.Context) {
-	vehicles := c.service.FindAllVehicles()
+	vehicles := c.service.FindAllVehicles(true)
 	data := gin.H{
 		"title":    "Vihecles Stock",
 		"vehicles": vehicles,

@@ -13,10 +13,12 @@ import (
 )
 
 var (
-	vehicleDB      models.VehicleDB      = models.NewVehicleDB()
-	vehicleService models.VehicleService = models.NewVehicleService(vehicleDB)
+	vehicleDB         models.VehicleDB         = models.NewVehicleDB()
+	vehicleService    models.VehicleService    = models.NewVehicleService(vehicleDB)
+	enterpriseService models.EnterpriseService = models.NewEnterpriseSerivce(vehicleDB)
 
-	vehicleController controllers.VehicleController = controllers.NewVehicleController(vehicleService)
+	vehicleController    controllers.VehicleController    = controllers.NewVehicleController(vehicleService)
+	enterpriseController controllers.EnterpriseController = controllers.NewEnterpriseController(enterpriseService)
 )
 
 func setupLogFile() {
@@ -58,44 +60,79 @@ func main() {
 
 	apiRoutes := server.Group("/api")
 	{
-		// apiRoutes.GET("/vehicles", func(ctx *gin.Context) {
-		// 	ctx.JSON(200, vehicleController.FindAllVehicles())
-		// })
 
-		// POST new vehicle
+		apiRoutes.GET("vehicles", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, vehicleController.FindAllVehicles(false))
+		})
+
+		// POST /api/vehicles creates new Vehicle object with nested
+		// CarModle in it.
 		apiRoutes.POST("/vehicles", func(ctx *gin.Context) {
 			err := vehicleController.SaveVehicle(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else if ctx.ContentType() == "application/json" {
+				ctx.JSON(http.StatusOK, gin.H{"message": "New Vehicle added OK"})
 			} else {
-				// ctx.JSON(http.StatusOK, gin.H{"message": "Success!"})
 				ctx.Redirect(http.StatusFound, "/view/vehicles")
 			}
 
 		})
 
-		// PUT is update existing vehicle
+		// POST /api/update/vehicle/:id updates existing Vehicle with nested
+		// CarModel by vehicle ID. Can update only CarModel.
 		apiRoutes.POST("/update/vehicle/:id", func(ctx *gin.Context) {
-			vehicleController.UpdateVehicle(ctx)
 			err := vehicleController.UpdateVehicle(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else if ctx.ContentType() == "application/json" {
+				ctx.JSON(http.StatusOK, gin.H{"message": "Vehicle updated OK"})
 			} else {
 				ctx.Redirect(http.StatusFound, "/view/vehicles")
 			}
 
 		})
 
+		// POST /api/delete/vehicle/:id soft deletes Vehicle with nested CarModel by vehicle ID.
 		apiRoutes.POST("/delete/vehicle/:id", func(ctx *gin.Context) {
 			err := vehicleController.DeleteVehicle(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else if ctx.ContentType() == "application/json" || ctx.ContentType() == "" {
+				ctx.JSON(http.StatusOK, gin.H{"message": "Vehicle deleted OK"})
 			} else {
 				ctx.Redirect(http.StatusFound, "/view/vehicles")
 			}
 
 		})
 
+		apiRoutes.POST("/save/enterprises", func(ctx *gin.Context) {
+			err := enterpriseController.SaveEnterprise(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusOK, gin.H{"message": "New enterprise added OK"})
+			}
+
+		})
+
+		apiRoutes.POST("/save/drivers", func(ctx *gin.Context) {
+			err := enterpriseController.SaveDriver(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusOK, gin.H{"message": "New driver added OK"})
+			}
+
+		})
+
+		apiRoutes.GET("/enterprises", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, enterpriseController.FindAllEnterprises())
+		})
+
+		apiRoutes.GET("/drivers", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, enterpriseController.FindAllDrivers())
+		})
 	}
 
 	port := os.Getenv("PORT")

@@ -13,14 +13,20 @@ import (
 )
 
 type VehicleDB interface {
-	Save(vehicle Vehicle) error
-	Update(vehicle Vehicle) error
-	Delete(vehicle Vehicle) error
-	FindAllVehicles() []Vehicle
+	SaveVehicle(vehicle Vehicle) error
+	UpdateVehicle(vehicle Vehicle) error
+	DeleteVehicle(vehicle Vehicle) error
+	FindAllVehicles(preload bool) []Vehicle
 	VehicleByID(id uint) Vehicle
 	FindAllCarModels() []CarModel
 	CloseConnection()
 	DestructiveReset() error
+
+	SaveEnterprise(enterprise Enterprise) error
+	SaveDriver(driver Driver) error
+
+	FindAllEnterprises() []Enterprise
+	FindAllDrivers() []Driver
 }
 
 type dbConn struct {
@@ -32,14 +38,16 @@ var connectionString = "host=localhost port=5432 user=admin password=qwerty dbna
 
 func NewVehicleDB() VehicleDB {
 	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger:               logger.Default.LogMode(logger.Info),
+		FullSaveAssociations: true,
 	})
 	if err != nil {
 		panic("Failed to connect to database")
 	}
 	// db.LogMode(true)
 
-	db.AutoMigrate(&CarModel{}, &Vehicle{})
+	db.AutoMigrate(&Enterprise{})
+	db.AutoMigrate(&CarModel{}, &Vehicle{}, &Driver{})
 	return &dbConn{
 		connection: db,
 	}
@@ -58,15 +66,15 @@ func (db *dbConn) CloseConnection() {
 	}
 }
 
-func (db *dbConn) Save(v Vehicle) error {
+func (db *dbConn) SaveVehicle(v Vehicle) error {
 	return db.connection.Create(&v).Error
 }
 
-func (db *dbConn) Update(v Vehicle) error {
+func (db *dbConn) UpdateVehicle(v Vehicle) error {
 	return db.connection.Save(&v).Error
 }
 
-func (db *dbConn) Delete(v Vehicle) error {
+func (db *dbConn) DeleteVehicle(v Vehicle) error {
 	var findV Vehicle
 	findV.ID = v.ID
 	db.connection.Preload("CarModel").Find(&findV)
@@ -89,12 +97,13 @@ func (db *dbConn) VehicleByID(id uint) Vehicle {
 
 }
 
-func (db *dbConn) FindAllVehicles() []Vehicle {
+func (db *dbConn) FindAllVehicles(preload bool) []Vehicle {
 	var vehicles []Vehicle
-	// in case of appearence foreign keys (nested structs in Vehicle table)
-	// change below to db.connection.Set("gorm:auto_preload", true).Find(&vehicles)
-	db.connection.Preload("CarModel").Find(&vehicles)
-	// db.connection.Find(&vehicles)
+	if preload {
+		db.connection.Preload("CarModel").Find(&vehicles)
+	} else {
+		db.connection.Select("id", "enterprise_id", "description", "price", "mileage", "manufactured_year", "car_model_id").Find(&vehicles)
+	}
 	return vehicles
 }
 
@@ -102,6 +111,26 @@ func (db *dbConn) FindAllCarModels() []CarModel {
 	var carModels []CarModel
 	db.connection.Find(&carModels)
 	return carModels
+}
+
+func (db *dbConn) FindAllEnterprises() []Enterprise {
+	var enterprises []Enterprise
+	db.connection.Select("id", "enterprise_name", "headquarter_city").Find(&enterprises)
+	return enterprises
+}
+
+func (db *dbConn) FindAllDrivers() []Driver {
+	var drivers []Driver
+	db.connection.Find(&drivers)
+	return drivers
+}
+
+func (db *dbConn) SaveEnterprise(e Enterprise) error {
+	return db.connection.Create(&e).Error
+}
+
+func (db *dbConn) SaveDriver(d Driver) error {
+	return db.connection.Create(&d).Error
 }
 
 // DROPDATABASE!
