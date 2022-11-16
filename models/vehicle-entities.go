@@ -4,15 +4,16 @@ import "gorm.io/gorm"
 
 type Vehicle struct {
 	gorm.Model
-	Enterprise       Enterprise `gorm:"foreignKey:EnterpriseID" json:"-"`
-	EnterpriseID     uint       `json:"enterprise_id" form:"enterprise_id"`
-	Description      string     `json:"description" form:"description"`
-	Price            uint       `gorm:"not null" json:"price" form:"price"`
-	Mileage          uint       `json:"mileage" form:"mileage"`
-	ManufacturedYear uint       `json:"manufactured" form:"manufactured"`
-	CarModel         CarModel   `json:"-" binding:"required"`
-	CarModelID       uint       `json:"carmodel_id" form:"-"`
-	Drivers          []Driver   `gorm:"many2many:vehicle_drivers"`
+	Description      string `json:"description" form:"description"`
+	Price            uint   `gorm:"not null" json:"price" form:"price"`
+	Mileage          uint   `json:"mileage" form:"mileage"`
+	ManufacturedYear uint   `json:"manufactured" form:"manufactured"`
+
+	Enterprise   Enterprise `gorm:"foreignKey:EnterpriseID" json:"-"`
+	EnterpriseID uint       `json:"enterprise_id" form:"enterprise_id"`
+	CarModel     CarModel   `json:"-" binding:"required"`
+	CarModelID   uint       `json:"carmodel_id" form:"-"`
+	Drivers      []Driver   `gorm:"foreignKey:VehicleID"`
 }
 
 type CarModel struct {

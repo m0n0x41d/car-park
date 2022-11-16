@@ -7,18 +7,17 @@ type Enterprise struct {
 	EnterpriseName  string    `json:"enterprise_name"`
 	HeadquarterCity string    `json:"headquarter_city"`
 	Vehicles        []Vehicle `gorm:"foreignKey:EnterpriseID" json:"-"`
-	Drivers         []Driver  `gorm:"foreignKey:EnterpriseID" json:"-"`
 }
 
 type Driver struct {
 	gorm.Model
-	Enterprise   Enterprise `gorm:"foreignKey:EnterpriseID" json:"-"`
-	EnterpriseID uint       `json:"enterprise_id"`
-	VehicleID    uint
-	IsActive     bool    `gorm:"index:bool_constraint,unique, where:is_active" json:"is_active"`
-	FirstName    string  `json:"first_name"`
-	LastName     string  `json:"last_name"`
-	Salary       float64 `json:"salary"`
+
+	FirstName string  `json:"first_name"`
+	LastName  string  `json:"last_name"`
+	Salary    float64 `json:"salary"`
+
+	VehicleID uint `json:"vehicle_id" gorm:"default:null"`
+	IsActive  bool `json:"is_active"`
 }
 
 type EnterpriseService interface {

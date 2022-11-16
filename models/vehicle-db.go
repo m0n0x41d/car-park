@@ -99,10 +99,13 @@ func (db *dbConn) VehicleByID(id uint) Vehicle {
 
 func (db *dbConn) FindAllVehicles(preload bool) []Vehicle {
 	var vehicles []Vehicle
+	var vehicle Vehicle
+	vehicle.ID = 1
 	if preload {
 		db.connection.Preload("CarModel").Find(&vehicles)
 	} else {
-		db.connection.Select("id", "enterprise_id", "description", "price", "mileage", "manufactured_year", "car_model_id").Find(&vehicles)
+		db.connection.Preload("Drivers").Select("id", "enterprise_id", "description", "price", "mileage", "manufactured_year", "car_model_id").Find(&vehicles)
+		// db.connection.Model(&vehicle).Association("Drivers").Find(&vehicle)
 	}
 	return vehicles
 }
