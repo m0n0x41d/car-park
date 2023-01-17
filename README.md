@@ -25,7 +25,7 @@ But, as I said already in paragraph above — it is terribly unfinished.
 
 Anyway it has:
 
-- Backend with excess rest api (returning json's) serves multiuser service with... basic auth (I will never use it again.)
+- Backend with excess rest api (returning json's) serves multiuser service with... basic auth, which I will never use again. DBMS is PostgreSQL with Postgis, for storing and representing geopoints.
 - Fronend interface of CarPark is build with go-templates with bootstrap, serving on /view routes.
 
 There is also gorilla/srcf package in use for protection UI forms from cross-site scripting. But of course security of this service not a topic of discuss at all, at least because of basic auth... I should have used normal JWT tokens :man_shrugging:
