@@ -1,0 +1,67 @@
+{{ template "header.html" .}}
+
+<main class="flex-shrink-0">
+  <div class="container pt-3">
+
+    <h3 class="mt-5">Cars in enterprise #{{.enterpriseID}}</h3>
+
+      <table class="table mt-5">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Description</th>
+            <th scope="col">Mileage</th>
+            <th scope="col">Manufactured Year</th>
+            <th scope="col">$ Price</th>
+            <th scope="col">Brand</th>
+            <th scope="col">Comission Date</th>
+            <th scope="col"></th>
+            {{/* <th scope="col"></th>
+            <th scope="col"></th> */}}
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          {{ range .vehicles }}
+          <tr>
+            <th scope="row">{{.ID}}</th>
+            <td>{{.Description}}
+            <td>{{.Mileage}}</td>
+            <td>{{.ManufacturedYear}}</td>
+            <td>{{.Price}}</td>
+            <td>{{.CarModel.Brand}}</td>
+
+            <td>
+              <script>
+                var localdate = new Date({{.CommissioningDate}}).toLocaleTimeString('ru-Ru', { day:"numeric", year:"numeric", month:"short", time:"numeric"})
+                document.write(localdate)
+              </script>
+            </td>
+
+            <td>
+              <a class="btn btn-primary" href="/view/manager/{{$.managerID}}/vehicles/{{.ID}}/rides" role="button">Rides</a>
+              <a class="btn btn-primary" href="/view/manager/{{$.managerID}}/vehicles/{{.ID}}/reports" role="button">Reports</a>
+              <a class="btn btn-primary" href="/view/manager/{{$.managerID}}/vehicles/edit/{{.ID}}" role="button">Edit</a>
+            </td>
+            {{/* <td>
+              <form action="/api/manager/{{$.managerID}}/vehicle/{{.ID}}/delete" method="POST">
+                <button type="submit" class="btn btn-danger">Delete</button>
+              </form>
+            </td> */}}
+
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+          <a class="btn btn-primary btn-lg" href="/view/manager/{{.managerID}}/vehicle/create" role="button">Register new Vehicle in service.</a>
+
+          {{ if ne .prevpage "noprev" }}
+            <a class="btn btn-primary btn-lg" href="{{.prevpage}}" role="button">Prevpage</a>
+          {{ end }}
+          {{ if ne .nextpage "nonext" }}
+            <a class="btn btn-primary btn-lg" href="{{.nextpage}}" role="button">Nextpage</a>
+          {{ end }}
+  </div>
+</main>
+
+
+{{ template "footer.html" .}}

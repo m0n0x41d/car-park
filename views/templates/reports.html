@@ -1,0 +1,130 @@
+{{ template "header.html" .}}
+
+{{if .selectdate}}
+
+
+<main class="flex-shrink-0">
+  <div class="container pt-3">
+
+<h3> Select timerange for reports list </h1>
+<form action="/view/manager/{{.managerID}}/vehicles/{{.vehicleID}}/reports" method="GET">
+
+  <div class="form-group">
+
+    <label for="dateofbirth">From</label>
+    <input type="date" name="notBefore" id="notBefore">
+
+    <label for="dateofbirth">To</label>
+    <input type="date" name="notAfter" id="notAfter">
+  </div>
+
+  <div class="form-group mt-2">
+      <label for="report_type">Report Type</label>
+      <div class="input-group">
+      <select class="custom-select form-control" id="report_type" name="report_type">
+      <option hidden>Choose the Report Type</option>
+      <option value="MilageReport">Milage Report</option>
+    </select>
+  </div>
+
+
+  <div class="form-group mt-2">
+      <label for="time_period">Time Period</label>
+      <div class="input-group">
+      <select class="custom-select form-control" id="time_period" name="time_period">
+      <option hidden>Choose report time period</option>
+      <option value="ByDay">By day</option>
+      <option value="ByWeek">By Week</option>
+      <option value="ByMonth">By Month</option>
+    </select>
+  </div>
+
+<button type="submit" class="btn btn-primary mt-3">Submit request</button>
+</form>
+
+
+
+
+<style>
+[type="date"] {
+  background:#fff url(https://cdn1.iconfinder.com/data/icons/cc_mono_icon_set/blacks/16x16/calendar_2.png)  97% 50% no-repeat ;
+}
+[type="date"]::-webkit-inner-spin-button {
+  display: none;
+}
+[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+}
+
+/* custom styles */
+
+input {
+  border: 1px solid #c4c4c4;
+  border-radius: 5px;
+  background-color: #fff;
+  padding: 3px 5px;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
+  width: 190px;
+}
+
+</style>
+
+  </div>
+</main>
+
+{{else}}
+
+{{ if .noReports }}
+<main class="flex-shrink-0">
+  <div class="container pt-3">
+    <h3> No reports in provided time range for vehicle # {{$.vehicleID}} </h3>
+    <form>
+      <input class="btn btn-primary" type="button" value="Go back" onclick="history.back()">
+    </form>
+  </div>
+</main>
+{{else}}
+
+
+
+<main class="flex-shrink-0">
+  <div class="container pt-3">
+
+    <h3 class="mt-5">Car #{{.vehicleID}} {{.report.TimePeriod}} {{.report.ReportType}}</h3>
+
+      <table class="table mt-5">
+        <thead>
+          <tr>
+            <th scope="col">Segment Start Time </th>
+            <th scope="col">Distance</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+
+
+          {{ range $key, $value := .report.Results }}
+          <tr>
+            <th>
+                <script>
+                  var localdateStart = new Date({{$key}}).toLocaleTimeString('ru-Ru', { day:"numeric", year:"numeric", month:"short", time:"numeric"})
+                  document.write(localdateStart)
+                </script>
+            </th>
+            <th>
+              {{ $value }}
+            </th>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+          <form>
+            <input class="btn btn-primary" type="button" value="Go back" onclick="history.back()">
+          </form>
+  </div>
+</main>
+
+
+{{end}}
+{{end}}
+
+{{ template "footer.html" .}}
